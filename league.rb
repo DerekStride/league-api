@@ -6,9 +6,11 @@ require 'pp'
 class League
   attr_accessor :baseurl
 
-  def initialize(baseurl = nil, api_key)
+  def initialize(api_key, region = 'na')
     @api = api_key
-    @baseurl = baseurl || 'https://na.api.pvp.net/'
+    @region = region
+    @baseurl = baseurl || "https://#{@region}.api.pvp.net"
+    @static_data_url = "#{@baseurl}/api/lol/static-data/#{@region}/v1.2"
   end
 
   def match(matchID, params = {})
@@ -17,13 +19,73 @@ class League
   end
 
   def champions(params = {})
-    uri = URI("#{@baseurl}/api/lol/static-data/na/v1.2/champion")
+    uri = URI("#{@static_data_url}/champion")
     query(uri, params)
   end
 
   def champion(champID,  params = {})
-    uri = URI("#{@baseurl}/api/lol/static-data/na/v1.2/champion/#{champID}")
+    uri = URI("#{@static_data_url}/champion/#{champID}")
     query(uri, params)
+  end
+
+  def items(params = {})
+    uri = URI("#{@static_data_url}/item")
+    query(uri, params)
+  end
+
+  def item(itemID, params = {})
+    uri = URI("#{@static_data_url}/item/#{itemID}")
+    query(uri, params)
+  end
+
+  def masteries(params = {})
+    uri = URI("#{@static_data_url}/mastery")
+    query(uri, params)
+  end
+
+  def mastery(masteryID, params = {})
+    uri = URI("#{@static_data_url}/mastery/#{masteryID}")
+    query(uri, params)
+  end
+
+  def runes(params = {})
+    uri = URI("#{@static_data_url}/rune")
+    query(uri, params)
+  end
+
+  def rune(runeID, params = {})
+    uri = URI("#{@static_data_url}/rune/#{runeID}")
+    query(uri, params)
+  end
+
+  def summoner_spells(params = {})
+    uri = URI("#{@static_data_url}/summoner-spell")
+    query(uri, params)
+  end
+
+  def summoner_spell(summoner_spellID, params = {})
+    uri = URI("#{@static_data_url}/summoner-spell/#{summoner_spellID}")
+    query(uri, params)
+  end
+
+  def languages
+    uri = URI("#{@static_data_url}/languages")
+    query(uri)
+  end
+
+  def map(params = {})
+    uri = URI("#{@static_data_url}/map")
+    query(uri, params)
+  end
+
+  def realm
+    uri = URI("#{@static_data_url}/realm")
+    query(uri)
+  end
+
+  def versions
+    uri = URI("#{@static_data_url}/versions")
+    query(uri)
   end
 
   private
@@ -54,3 +116,21 @@ api = File.read(api_file_path).chomp
 l = League.new(api)
 
 pp l.champion(37, champData: 'stats')
+
+# 51100547
+
+l.match(1_974_966_985)
+l.champions(champData: 'stats')
+l.champion(37, champData: 'stats')
+l.items(itemListData: 'stats')
+l.item(3725, itemListData: 'stats')
+l.masteries(masteryData: 'all')
+l.mastery(4331, masteryData: 'all')
+l.runes(runeData: 'stats')
+l.rune(5235, runeData: 'stats')
+l.summoner_spells
+l.summoner_spell(12)
+l.languages
+l.map
+l.realm
+l.versions
