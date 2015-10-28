@@ -10,6 +10,7 @@ class League
     @region = region
     @baseurl = baseurl || "https://#{@region}.api.pvp.net"
     @static_data_url = "#{@baseurl}/api/lol/static-data/#{@region}/v1.2"
+    @summoner_data_url = "#{@baseurl}/api/lol/#{@region}/v1.4/summoner"
   end
 
   def match(matchID, params = {})
@@ -84,6 +85,18 @@ class League
 
   def versions
     uri = URI("#{@static_data_url}/versions")
+    query(uri)
+  end
+
+  #summoner section of the api
+  def summoner_byname(name)
+    uri = URI("#{@summoner_data_url}/by-name/#{name}")
+    query(uri)
+  end
+
+  #matchlist
+  def match_list(summoner_ID)
+    uri = URI("#{@baseurl}/api/lol/#{@region}/v2.2/matchlist/by-summoner/#{summoner_ID}")
     query(uri)
   end
 

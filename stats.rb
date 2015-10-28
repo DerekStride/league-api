@@ -6,8 +6,14 @@ def api_key
   File.read(api_file_path).chomp
 end
 
-pp api_key
-
-league_api = League.new(api_key)
-
-pp league_api.champions
+# pp api_key
+#
+# league_api = League.new(api_key)
+#
+# summoner = league_api.summoner_byname("SilentSith")
+#
+# sum = summoner[:silentsith][:id]
+#
+# matches = league_api.match_list(summoner[:silentsith][:id])
+#
+# pp matches
