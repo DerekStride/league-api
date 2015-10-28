@@ -1,6 +1,5 @@
 require 'net/http'
 require 'json'
-require 'pp'
 
 # League interfaces with the riot API
 class League
@@ -110,27 +109,24 @@ class League
   end
 end
 
-api_file_path = File.join(Dir.home, '.riot', 'credentials')
-api = File.read(api_file_path).chomp
-
-l = League.new(api)
-
-pp l.champion(37, champData: 'stats')
-
-# 51100547
-
-l.match(1_974_966_985)
-l.champions(champData: 'stats')
-l.champion(37, champData: 'stats')
-l.items(itemListData: 'stats')
-l.item(3725, itemListData: 'stats')
-l.masteries(masteryData: 'all')
-l.mastery(4331, masteryData: 'all')
-l.runes(runeData: 'stats')
-l.rune(5235, runeData: 'stats')
-l.summoner_spells
-l.summoner_spell(12)
-l.languages
-l.map
-l.realm
-l.versions
+# l = League.new(api)
+#
+# pp l.champion(37, champData: 'stats')
+#
+# # 51100547
+#
+# l.match(1_974_966_985)
+# l.champions(champData: 'stats')
+# l.champion(37, champData: 'stats')
+# l.items(itemListData: 'stats')
+# l.item(3725, itemListData: 'stats')
+# l.masteries(masteryData: 'all')
+# l.mastery(4331, masteryData: 'all')
+# l.runes(runeData: 'stats')
+# l.rune(5235, runeData: 'stats')
+# l.summoner_spells
+# l.summoner_spell(12)
+# l.languages
+# l.map
+# l.realm
+# l.versions

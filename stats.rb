@@ -1,10 +1,13 @@
-require_relative "league"
+require_relative 'league'
+require 'pp'
 
-def get_api_key()
-  api_file = File.open(ENV['HOME'] + '/.riot/credentials')
-  credentials = api_file.read.delete("\n")
+def api_key
+  api_file_path = File.join(Dir.home, '.riot', 'credentials')
+  File.read(api_file_path).chomp
 end
 
-api = new league(get_api_key)
+pp api_key
 
-puts api.champions
+league_api = League.new(api_key)
+
+pp league_api.champions
