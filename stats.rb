@@ -7,40 +7,26 @@ def api_key
 end
 
 def match_list_from_summoner_name(name, api)
-  name.downcase!
   summoner = api.summoner_byname(name)
   api.match_list(summoner.fetch(name.to_sym).fetch(:id))
 end
 
-def champion_key_from_id(champs, id)
-  champs.each {|champion|
-    if champion.fetch(:id) == id
-      return champion.fetch(:key)
-    end
-  }
-end
-
-def champions_played(match_list, champions)
-  played_champions = Hash.new(0)
-  # pp match_list
+def champions_played(match_list, api)
+  played_champs = Hash.new(0)
+  champs = champ_keys(api)
   matches = match_list.fetch(:matches)
-  matches.each {|match|
-    played_champions[champion_key_from_id(champions, match.fetch(:champion)).to_sym] += 1
-  }
-  pp played_champions
+  matches.each do |match|
+    played_champs[champs.fetch(match.fetch(:champion).to_s.to_sym).to_sym] += 1
+  end
+  pp played_champs
 end
 
-def build_champ_hash(api)
-  champs = []
-  list = api.champions
-  list = list.fetch(:data)
-  list.each {|_key, val| champs << val}
-  champs
+def champ_keys(api)
+  api.champions(champData: 'keys').fetch(:keys)
 end
 
 league_api = League.new(api_key)
-champions = build_champ_hash(league_api)
-puts "Enter Summoner Name"
-name = gets.chomp
+puts 'Enter Summoner Name'
+name = gets.chomp.sub(' ', '').downcase
 list = match_list_from_summoner_name(name, league_api)
-champions_played(list, champions)
+champions_played(list, league_api)
