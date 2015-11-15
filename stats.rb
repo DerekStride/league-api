@@ -1,12 +1,13 @@
 require_relative 'league'
 require 'pp'
 class Stats
+  attr_accessor :match_list
   def initialize(name)
     @summoner_name = name
     @league_api = League.new(api_key)
     @summoner_id = summoner_id_from_name(name)
     @match_list = @league_api.match_list(@summoner_id)
-    @champions = build_champ_hash
+    @champions = champ_keys
     @champions_played = champions_played
   end
 
@@ -36,32 +37,34 @@ class Stats
   end
 
   def champions_played
-    played_champions = Hash.new(0)
-    # pp match_list
+    played_champs = Hash.new(0)
+    champs = champ_keys
     matches = @match_list.fetch(:matches)
-    matches.each {|match|
-      played_champions[champion_key_from_id(@champions, match.fetch(:champion)).to_sym] += 1
-    }
-    played_champions
+    matches.each do |match|
+    played_champs[champs.fetch(match.fetch(:champion).to_s.to_sym).to_sym] += 1
+    end
+    pp played_champs
   end
 
-  def build_champ_hash
-    champs = []
-    list = @league_api.champions
-    list = list.fetch(:data)
-    list.each {|_key, val| champs << val}
-    champs
+  def champ_keys
+    @league_api.champions(champData: 'keys').fetch(:keys)
   end
 
   def calculate_over_time_data(match_list, name, api)
 
   end
 end
-league_api = League.new(api_key)
-champions = build_champ_hash(league_api)
-puts "Enter Summoner Name"
-name = gets.chomp
-list = match_list_from_summoner_name(name, league_api)
+
+
+#league_api = League.new(api_key)
+puts 'Enter Summoner Name'
+name = gets.chomp.sub(' ', '').downcase
+stats = Stats.new(name)
+pp stats.match_list
+#list = match_list_from_summoner_name(name, league_api)
 #match id test 1_942_658_534
-pp league_api.match(1_942_658_534)
+
+#pp league_api.match(1_942_658_534)
 # champions_played(list, champions)
+
+#champions_played(list, league_api)

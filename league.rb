@@ -3,18 +3,24 @@ require 'json'
 
 # League interfaces with the riot API
 class League
-  attr_accessor :baseurl
+  attr_accessor :symbolize_json
 
   def initialize(api_key, region = 'na')
     @api = api_key
     @region = region
-    @baseurl = baseurl || "https://#{@region}.api.pvp.net"
+    @baseurl = "https://#{@region}.api.pvp.net"
     @static_data_url = "#{@baseurl}/api/lol/static-data/#{@region}/v1.2"
     @summoner_data_url = "#{@baseurl}/api/lol/#{@region}/v1.4/summoner"
+    @matchs_url = "#{@baseurl}/api/lol/#{@region}/v2.2/matchlist/by-summoner"
+    @symbolize_json = true
   end
 
+  ########################################################################
+  # Static
+  ########################################################################
   def match(matchID, params = {})
-    uri = URI("#{@baseurl}/api/lol/na/v2.2/match/#{matchID}")
+    path_val = URI.encode_www_form_component(matchID)
+    uri = URI("#{@baseurl}/api/lol/na/v2.2/match/#{path_val}")
     query(uri, params)
   end
 
@@ -24,7 +30,8 @@ class League
   end
 
   def champion(champID,  params = {})
-    uri = URI("#{@static_data_url}/champion/#{champID}")
+    path_val = URI.encode_www_form_component(champID)
+    uri = URI("#{@static_data_url}/champion/#{path_val}")
     query(uri, params)
   end
 
@@ -34,7 +41,8 @@ class League
   end
 
   def item(itemID, params = {})
-    uri = URI("#{@static_data_url}/item/#{itemID}")
+    path_val = URI.encode_www_form_component(itemID)
+    uri = URI("#{@static_data_url}/item/#{path_val}")
     query(uri, params)
   end
 
@@ -44,7 +52,8 @@ class League
   end
 
   def mastery(masteryID, params = {})
-    uri = URI("#{@static_data_url}/mastery/#{masteryID}")
+    path_val = URI.encode_www_form_component(masteryID)
+    uri = URI("#{@static_data_url}/mastery/#{path_val}")
     query(uri, params)
   end
 
@@ -54,7 +63,8 @@ class League
   end
 
   def rune(runeID, params = {})
-    uri = URI("#{@static_data_url}/rune/#{runeID}")
+    path_val = URI.encode_www_form_component(runeID)
+    uri = URI("#{@static_data_url}/rune/#{path_val}")
     query(uri, params)
   end
 
@@ -64,7 +74,8 @@ class League
   end
 
   def summoner_spell(summoner_spellID, params = {})
-    uri = URI("#{@static_data_url}/summoner-spell/#{summoner_spellID}")
+    path_val = URI.encode_www_form_component(summoner_spellID)
+    uri = URI("#{@static_data_url}/summoner-spell/#{path_val}")
     query(uri, params)
   end
 
@@ -88,16 +99,44 @@ class League
     query(uri)
   end
 
-  #summoner section of the api
+  ########################################################################
+  # Summoner
+  ########################################################################
   def summoner_byname(name)
-    uri = URI("#{@summoner_data_url}/by-name/#{name}")
+    path_val = URI.encode_www_form_component(name)
+    uri = URI("#{@summoner_data_url}/by-name/#{path_val}")
     query(uri)
   end
 
-  #matchlist
-  def match_list(summoner_ID)
-    uri = URI("#{@baseurl}/api/lol/#{@region}/v2.2/matchlist/by-summoner/#{summoner_ID}")
+  def summoner_by_id(id)
+    path_val = URI.encode_www_form_component(id)
+    uri = URI("#{@summoner_data_url}/#{path_val}")
     query(uri)
+  end
+
+  def summoner_masteries(id)
+    uri = URI("#{@summoner_data_url}/#{id}/masteries")
+    query(uri)
+  end
+
+  def summoner_runes(id)
+    path_val = URI.encode_www_form_component(id)
+    uri = URI("#{@summoner_data_url}/#{path_val}/runes")
+    query(uri)
+  end
+
+  def summoner_name(id)
+    path_val = URI.encode_www_form_component(id)
+    uri = URI("#{@summoner_data_url}/#{path_val}/name")
+    query(uri)
+  end
+
+  ########################################################################
+  # Matchlist
+  ########################################################################
+  def match_list(summonerID, params = {})
+    uri = URI("#{@matchs_url}/#{summonerID}")
+    query(uri, params)
   end
 
   private
@@ -105,7 +144,7 @@ class League
   def query(uri, params = {})
     uri.query = URI.encode_www_form(params.merge(api_key: @api))
     response = Net::HTTP.get_response(uri)
-    parse_response(response, symbolize_names: true)
+    parse_response(response, symbolize_names: @symbolize_json)
   end
 
   def parse_response(response, params = {})
@@ -126,7 +165,7 @@ end
 #
 # pp l.champion(37, champData: 'stats')
 #
-# # 51100547
+# 51100547
 #
 # l.match(1_974_966_985)
 # l.champions(champData: 'stats')
