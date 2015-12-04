@@ -12,14 +12,15 @@ class League
     @static_data_url = "#{@baseurl}/api/lol/static-data/#{@region}/v1.2"
     @summoner_data_url = "#{@baseurl}/api/lol/#{@region}/v1.4/summoner"
     @matchs_url = "#{@baseurl}/api/lol/#{@region}/v2.2/matchlist/by-summoner"
+    @stats_url = "#{@baseurl}/api/lol/#{@region}/v1.3/stats/by-summoner"
     @symbolize_json = true
   end
 
   ########################################################################
   # Static
   ########################################################################
-  def match(matchID, params = {})
-    path_val = URI.encode_www_form_component(matchID)
+  def match(match_id, params = {})
+    path_val = URI.encode_www_form_component(match_id)
     uri = URI("#{@baseurl}/api/lol/na/v2.2/match/#{path_val}")
     query(uri, params)
   end
@@ -29,8 +30,8 @@ class League
     query(uri, params)
   end
 
-  def champion(champID,  params = {})
-    path_val = URI.encode_www_form_component(champID)
+  def champion(champ_id, params = {})
+    path_val = URI.encode_www_form_component(champ_id)
     uri = URI("#{@static_data_url}/champion/#{path_val}")
     query(uri, params)
   end
@@ -40,8 +41,8 @@ class League
     query(uri, params)
   end
 
-  def item(itemID, params = {})
-    path_val = URI.encode_www_form_component(itemID)
+  def item(item_id, params = {})
+    path_val = URI.encode_www_form_component(item_id)
     uri = URI("#{@static_data_url}/item/#{path_val}")
     query(uri, params)
   end
@@ -51,8 +52,8 @@ class League
     query(uri, params)
   end
 
-  def mastery(masteryID, params = {})
-    path_val = URI.encode_www_form_component(masteryID)
+  def mastery(mastery_id, params = {})
+    path_val = URI.encode_www_form_component(mastery_id)
     uri = URI("#{@static_data_url}/mastery/#{path_val}")
     query(uri, params)
   end
@@ -62,8 +63,8 @@ class League
     query(uri, params)
   end
 
-  def rune(runeID, params = {})
-    path_val = URI.encode_www_form_component(runeID)
+  def rune(rune_id, params = {})
+    path_val = URI.encode_www_form_component(rune_id)
     uri = URI("#{@static_data_url}/rune/#{path_val}")
     query(uri, params)
   end
@@ -73,8 +74,8 @@ class League
     query(uri, params)
   end
 
-  def summoner_spell(summoner_spellID, params = {})
-    path_val = URI.encode_www_form_component(summoner_spellID)
+  def summoner_spell(summoner_spell_id, params = {})
+    path_val = URI.encode_www_form_component(summoner_spell_id)
     uri = URI("#{@static_data_url}/summoner-spell/#{path_val}")
     query(uri, params)
   end
@@ -134,8 +135,20 @@ class League
   ########################################################################
   # Matchlist
   ########################################################################
-  def match_list(summonerID, params = {})
-    uri = URI("#{@matchs_url}/#{summonerID}")
+  def matchlist(summoner_id, params = {})
+    id = normalize_summoner_id(summoner_id)
+    path_val = URI.encode_www_form_component(id)
+    uri = URI("#{@matchs_url}/#{path_val}")
+    query(uri, params)
+  end
+
+  ########################################################################
+  # Stats
+  ########################################################################
+  def stats(summoner_id, params = {})
+    id = normalize_summoner_id(summoner_id)
+    path_val = URI.encode_www_form_component(id)
+    uri = URI("#{@stats_url}/#{path_val}/ranked")
     query(uri, params)
   end
 
@@ -143,13 +156,19 @@ class League
 
   def query(uri, params = {})
     uri.query = URI.encode_www_form(params.merge(api_key: @api))
-    response = Net::HTTP.get_response(uri)
+    response = nil
+    5.times do |_|
+      response = Net::HTTP.get_response(uri)
+      break unless response.code == '429'
+      sleep(response['retry-after'].to_i || 2)
+    end
     parse_response(response, symbolize_names: @symbolize_json)
   end
 
   def parse_response(response, params = {})
     bad_response(response)
     result = JSON.parse(response.body, params)
+    pp result unless response.is_a?(Net::HTTPSuccess)
     # bad_request(result)
     result
   end
@@ -159,26 +178,19 @@ class League
     "\nCode: #{response.code}" \
     "\nBody: #{response.body}" unless response.is_a?(Net::HTTPSuccess)
   end
-end
 
-# l = League.new(api)
-#
-# pp l.champion(37, champData: 'stats')
-#
-# 51100547
-#
-# l.match(1_974_966_985)
-# l.champions(champData: 'stats')
-# l.champion(37, champData: 'stats')
-# l.items(itemListData: 'stats')
-# l.item(3725, itemListData: 'stats')
-# l.masteries(masteryData: 'all')
-# l.mastery(4331, masteryData: 'all')
-# l.runes(runeData: 'stats')
-# l.rune(5235, runeData: 'stats')
-# l.summoner_spells
-# l.summoner_spell(12)
-# l.languages
-# l.map
-# l.realm
-# l.versions
+  def normalize_summoner_id(id)
+    return id if id.is_a? Fixnum
+    summoner_id_from_name(id)
+  end
+
+  def summoner_id_from_name(name)
+    id = name.downcase
+    summoner = summoner_byname(id)
+    if @symbolize_json
+      return summoner.fetch(id.to_sym).fetch(:id)
+    else
+      return summoner.fetch(id).fetch('id')
+    end
+  end
+end
