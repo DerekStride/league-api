@@ -159,7 +159,7 @@ class League
     response = nil
     5.times do |_|
       response = Net::HTTP.get_response(uri)
-      break unless response.code == '429'
+      break unless %w(429 500).include?(response.code)
       sleep(response['retry-after'].to_i || 2)
     end
     parse_response(response, symbolize_names: @symbolize_json)
@@ -168,7 +168,6 @@ class League
   def parse_response(response, params = {})
     bad_response(response)
     result = JSON.parse(response.body, params)
-    pp result unless response.is_a?(Net::HTTPSuccess)
     # bad_request(result)
     result
   end
