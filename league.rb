@@ -1,6 +1,6 @@
 require 'net/http'
 require 'json'
-require 'jsoncache'
+require_relative '../jsoncache/lib/jsoncache'
 
 # LeagueAPICore contains the core functionality for the riot API
 module LeagueAPICore
@@ -11,12 +11,10 @@ module LeagueAPICore
   private
 
   def get_response(uri, delta, params = {})
-    json_params = { symbolize_names: @symbolize_json }
-    url = uri.to_s
-    return retrieve_cache(url, json_params) if cached?(url, delta)
-
-    uri.query = URI.encode_www_form(params.merge(api_key: @api))
-    query(uri)
+    cache(uri_to_key(uri), delta) do
+      uri.query = URI.encode_www_form(params.merge(api_key: @api))
+      query(uri)
+    end
   end
 
   def query(uri)
@@ -25,20 +23,19 @@ module LeagueAPICore
       if %w(429 500 503).include?(response.code)
         sleep(response['retry-after'].to_i || 2)
       else
-        return parse_response(response, uri.to_s)
+        return parse_response(response)
       end
     end
   end
 
   # Overwrite the JSONCache method to support cached data
-  def uri_to_file_path_root(uri)
-    uri.gsub(%r{[\.\/]|https:\/\/.*v\d\.\d|\?api_key=.*}, '')
+  def uri_to_key(uri)
+    uri.to_s.gsub(%r{[\.\/]|https:\/\/.*v\d\.\d|\?api_key=.*}, '')
   end
 
-  def parse_response(response, uri)
+  def parse_response(response)
     bad_response(response)
     result = JSON.parse(response.body, symbolize_names: @symbolize_json)
-    cache_file(result, uri) if response.is_a?(Net::HTTPSuccess)
     result
   end
 
@@ -57,6 +54,7 @@ module LeagueAPICore
     id = name.chomp.delete(' ').downcase
     summoner = summoner_byname(id)
     if @symbolize_json
+      pp summoner
       return summoner.fetch(id.to_sym).fetch(:id)
     else
       return summoner.fetch(id).fetch('id')
