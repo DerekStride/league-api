@@ -1,6 +1,6 @@
 require 'net/http'
 require 'json'
-require_relative '../jsoncache/lib/jsoncache'
+require 'jsoncache'
 
 # LeagueAPICore contains the core functionality for the riot API
 module LeagueAPICore
@@ -54,7 +54,6 @@ module LeagueAPICore
     id = name.chomp.delete(' ').downcase
     summoner = summoner_byname(id)
     if @symbolize_json
-      pp summoner
       return summoner.fetch(id.to_sym).fetch(:id)
     else
       return summoner.fetch(id).fetch('id')
@@ -164,17 +163,17 @@ module LeagueAPIStaticMethods
 
   def map(params = {})
     uri = URI("#{@static_data_url}/map")
-    get_response(uri, false, 0, params)
+    get_response(uri, 0, params)
   end
 
   def realm
     uri = URI("#{@static_data_url}/realm")
-    get_response(uri, false, 0)
+    get_response(uri, 0)
   end
 
   def versions
     uri = URI("#{@static_data_url}/versions")
-    get_response(uri, false, 0)
+    get_response(uri, 0)
   end
 end
 
