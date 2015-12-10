@@ -4,14 +4,15 @@ require 'jsoncache'
 
 # LeagueAPICore contains the core functionality for the riot API
 module LeagueAPICore
-  include JSONCache
-
   attr_accessor :symbolize_json, :retries
 
   private
 
   def get_response(uri, delta, params = {})
-    cache(uri_to_key(uri), delta) do
+    JSONCache.cache(uri_to_key(uri),
+                    cache_directory: 'league',
+                    delta: delta,
+                    symbolize: @symbolize_json) do
       uri.query = URI.encode_www_form(params.merge(api_key: @api))
       query(uri)
     end
