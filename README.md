@@ -1,2 +1,2 @@
-# leagueOfStats
-Stats analyzer for league of legends
+# LeagueAPI
+An interface between your code and the League of Legends API.
