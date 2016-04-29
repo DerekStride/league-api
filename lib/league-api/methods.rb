@@ -12,6 +12,7 @@ module API
     # Requires implementing +get_response(uri, delta, params = {})+, see
     # API::League::Core for an example.
     module Methods
+      extend JSONCache
       include API::League::Methods::Static
       include API::League::Methods::Summoner
 
@@ -22,7 +23,7 @@ module API
         id = normalize_summoner_id(summoner_id)
         path_val = URI.encode_www_form_component(id)
         uri = URI("#{@matchs_url}/#{path_val}")
-        get_response(uri, 300, params)
+        get_response(uri, params)
       end
 
       ########################################################################
@@ -32,8 +33,11 @@ module API
         id = normalize_summoner_id(summoner_id)
         path_val = URI.encode_www_form_component(id)
         uri = URI("#{@stats_url}/#{path_val}/ranked")
-        get_response(uri, 300, params)
+        get_response(uri, params)
       end
+
+      cache :stats,     expiry: 300
+      cache :matchlist, expiry: 300
 
       private
 

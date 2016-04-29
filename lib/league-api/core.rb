@@ -16,7 +16,6 @@ module API
 
       private
 
-
       # Performs a get request on the specified uri and will cache it.
       #
       # ==== Parameters
@@ -24,14 +23,9 @@ module API
       # +uri+:: +String+ The endpoint to query.
       # +delta+:: +Fixnum+ The expiry time for the cache (0 for no expiration).
       # +params+:: +Hash+ A hash of the optional parameters for the request.
-      def get_response(uri, delta, params = {})
-        JSONCache.cache(uri_to_key(uri),
-                        cache_directory: 'league',
-                        delta: delta,
-                        symbolize: @symbolize_json) do
-          uri.query = URI.encode_www_form(params.merge(api_key: @api))
-          query(uri)
-        end
+      def get_response(uri, params = {})
+        uri.query = URI.encode_www_form(params.merge(api_key: @api))
+        query(uri)
       end
 
       # Queries the League API and retries upon recoverable failure
