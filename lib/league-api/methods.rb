@@ -12,6 +12,7 @@ module API
     # Requires implementing +get_response(uri, delta, params = {})+, see
     # API::League::Core for an example.
     module Methods
+      extend JSONCache
       include API::League::Methods::Static
       include API::League::Methods::Summoner
 
@@ -34,6 +35,9 @@ module API
         uri = URI("#{@stats_url}/#{path_val}/ranked")
         get_response(uri, 300, params)
       end
+
+      cache :stats,     cache_directory: 'league', symbolize_json: true, expiry: 300
+      cache :matchlist, cache_directory: 'league', symbolize_json: true, expiry: 300
 
       private
 

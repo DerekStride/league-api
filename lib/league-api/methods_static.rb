@@ -9,6 +9,8 @@ module API
       # Requires implementing +get_response(uri, delta, params = {})+, see
       # API::League::Core for an example.
       module Static
+        extend JSONCache
+
         def match(match_id, params = {})
           path_val = URI.encode_www_form_component(match_id)
           uri = URI("#{@baseurl}/api/lol/na/v2.2/match/#{path_val}")
@@ -88,6 +90,13 @@ module API
         def versions
           uri = URI("#{@static_data_url}/versions")
           get_response(uri, 0)
+        end
+
+        %i(match champion item mastery rune summoner_spell map languages realm versions).each do |method|
+          cache method, cache_directory: 'league', symbolize_json: true, expiry: 0
+        end
+        %i(champions items masteries runes summoner_spells).each do |method|
+          cache method, cache_directory: 'league', symbolize_json: true, expiry: 300
         end
       end
     end
