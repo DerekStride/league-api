@@ -23,7 +23,7 @@ module API
         id = normalize_summoner_id(summoner_id)
         path_val = URI.encode_www_form_component(id)
         uri = URI("#{@matchs_url}/#{path_val}")
-        get_response(uri, 300, params)
+        get_response(uri, params)
       end
 
       ########################################################################
@@ -33,11 +33,11 @@ module API
         id = normalize_summoner_id(summoner_id)
         path_val = URI.encode_www_form_component(id)
         uri = URI("#{@stats_url}/#{path_val}/ranked")
-        get_response(uri, 300, params)
+        get_response(uri, params)
       end
 
-      cache :stats,     cache_directory: 'league', symbolize_json: true, expiry: 300
-      cache :matchlist, cache_directory: 'league', symbolize_json: true, expiry: 300
+      cache :stats,     expiry: 300
+      cache :matchlist, expiry: 300
 
       private
 

@@ -41,7 +41,7 @@ module API
         end
 
         %i(summoner_byname summoner_by_id summoner_masteries summoner_runes summoner_name).each do |method|
-          cache method, cache_directory: 'league', symbolize_json: true, expiry: 0
+          cache method, expiry: 0
         end
       end
     end
