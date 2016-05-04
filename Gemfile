@@ -1,4 +1,9 @@
 source 'https://rubygems.org'
 
-gem 'rspec'
 gem 'jsoncache'
+
+group :development do
+  gem 'rspec'
+  gem 'fakefs'
+  gem 'rake'
+end
